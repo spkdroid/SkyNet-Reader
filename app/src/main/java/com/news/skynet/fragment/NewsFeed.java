@@ -60,6 +60,12 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
     SwipeRefreshLayout swipeContainer;
     private TextView msg;
 
+    // empty constructor to handle the screen orientation change
+    public  NewsFeed()
+    {
+        super();
+    }
+
     public NewsFeed(String s) {
         this.url = s;
     }
