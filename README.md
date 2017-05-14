@@ -69,8 +69,8 @@ Just submit a pull request.
 
 ## Authors
 
-* **Ramkumar Velmurugan** - [Ramkumar Velmurugan](<a href="http://www.spkdroid.com/CV/">Portfolio</a>
-)
+* **Ramkumar Velmurugan** - <a href="http://www.spkdroid.com/CV/">Portfolio</a>
+
 
 
 ## License
