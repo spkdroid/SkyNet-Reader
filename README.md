@@ -69,7 +69,7 @@ Just submit a pull request.
 
 ## Authors
 
-* **Ramkumar Velmurugan** - [Ramkumar Velmurugan](http://spkdroid/CV/)
+* **Ramkumar Velmurugan** - [Ramkumar Velmurugan](http://www.spkdroid/CV/)
 
 
 ## License
