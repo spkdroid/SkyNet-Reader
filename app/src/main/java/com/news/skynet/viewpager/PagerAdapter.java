@@ -8,9 +8,11 @@ package com.news.skynet.viewpager;
  *  tab view to the user.
  *
  */
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+
 import com.news.skynet.fragment.NewsFeed;
 
 public class PagerAdapter extends FragmentStatePagerAdapter {

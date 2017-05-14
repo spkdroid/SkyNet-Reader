@@ -1,8 +1,7 @@
 package com.news.skynet.adapter;
 
 import android.app.Application;
-import android.text.TextUtils;
- 
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
