@@ -33,7 +33,6 @@ import com.news.skynet.R;
 import com.news.skynet.adapter.AppController;
 import com.news.skynet.adapter.Newsfeedadapter;
 import com.news.skynet.bean.News;
-import com.news.skynet.webview.CustomWebView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,13 +42,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * NewsFeed.java
- *
+ * <p>
  * A placeholder fragment containing the news feed as a simple list.
- *
+ * <p>
  * The fragment consume the url as a constructer and will generate the feeds as a simple list.
- *
  */
 @SuppressLint("ValidFragment")
 public class NewsFeed extends Fragment implements AdapterView.OnItemClickListener {
@@ -63,9 +60,8 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
     SwipeRefreshLayout swipeContainer;
     private TextView msg;
 
-     public NewsFeed(String s)
-    {
-        this.url=s;
+    public NewsFeed(String s) {
+        this.url = s;
     }
 
     @Override
@@ -73,19 +69,18 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
 
-        swipeContainer = (SwipeRefreshLayout)rootView.findViewById(R.id.swipeContainer);
+        swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
 
         listView = (ListView) rootView.findViewById(R.id.partylist);
 
-        msg =(TextView) rootView.findViewById(R.id.emptymsg);
+        msg = (TextView) rootView.findViewById(R.id.emptymsg);
         msg.setVisibility(View.INVISIBLE);
         adapter = new Newsfeedadapter(getActivity(), newsfeedList);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
 
         // when the items in the list are empty then a warning message is shown in the e screen
-        if(adapter.isEmpty())
-        {
+        if (adapter.isEmpty()) {
             msg.setVisibility(View.VISIBLE);
         }
 
@@ -99,9 +94,9 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-               // call the send request method to call the url
-               sendRequest(url);
-               swipeContainer.setRefreshing(false);
+                // call the send request method to call the url
+                sendRequest(url);
+                swipeContainer.setRefreshing(false);
             }
         });
 
@@ -112,10 +107,7 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
                 android.R.color.holo_red_light);
 
 
-
-
-
-    sendRequest(url);
+        sendRequest(url);
         return rootView;
     }
 
@@ -125,8 +117,7 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
      * @param url
      */
 
-    private void sendRequest(String url)
-    {
+    private void sendRequest(String url) {
         JsonArrayRequest movieReq = new JsonArrayRequest(url,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -144,7 +135,7 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
                                 newsfeed.setImage(obj.getString("temp"));
                                 newsfeed.setNewsLine(obj.getString("description"));
                                 newsfeed.setUrl(obj.getString("link"));
-                                newsfeed.setDate(obj.getString("date").substring(5,16));
+                                newsfeed.setDate(obj.getString("date").substring(5, 16));
                                 // adding movie to movies array
                                 newsfeedList.add(newsfeed);
                             } catch (JSONException e) {
@@ -180,9 +171,10 @@ public class NewsFeed extends Fragment implements AdapterView.OnItemClickListene
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        final String lert_description=((TextView)view.findViewById(R.id.url)).getText().toString();
-        Intent i=new Intent(getActivity(),CustomWebView.class);
-        i.putExtra("url",lert_description);
+        final String lert_description = ((TextView) view.findViewById(R.id.url)).getText().toString();
+        Intent i = new Intent(Intent.ACTION_VIEW,
+                Uri.parse(lert_description));
         startActivity(i);
+
     }
 }
