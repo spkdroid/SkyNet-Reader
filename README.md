@@ -1,84 +1,109 @@
-# SkyNet Reader
+# 📖 SkyNet Reader
 
-<a href=""><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/app/src/main/res/mipmap-mdpi/ic_launcher.png" align="left" height="125" width="125" ></a>
+<p>
+  <a href=""><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/app/src/main/res/mipmap-mdpi/ic_launcher.png" align="left" height="125" width="125" alt="SkyNet Reader Icon"></a>
+</p>
 
+SkyNet Reader is a lightweight and fast **news feed application** designed for Android smartphones. It leverages a RESTful API to fetch categorized news feeds, ensuring a neat and clean presentation for users. The app currently supports news categories such as **World News**, **Entertainment**, **Business**, **Technology**, and **Politics**.
 
-SkyNet Reader is a simple news feed application for your android smartphone. The application uses a simple restful API call to the skynet server to fetch the details. The application is tailored in such a fashion that the information is presented neat and clean. The application will categorize the news feed into different news types and provides you a separate set list.
+---
 
-## Features
+## ✨ Features
 
-<a href=""><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/app/src/main/res/drawable/second.png" align="left" height="125" width="125" ></a>
+<p>
+  <a href=""><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/app/src/main/res/drawable/second.png" align="left" height="125" width="125" alt="SkyNet Reader Features"></a>
+</p>
 
-1) Light Weight News Reader <br>
-2) Fast and Robust <br>
-3) Consumes fewer volume data <br>
-4) Feeds are auto-categorized into different types <br>
-5) Current Version 1.0 Supports World News, Entertainment, Business, Technology, and Politics.
+- **Lightweight News Reader**: Minimalistic and optimized for performance.  
+- **Fast & Robust**: Ensures smooth and quick access to news.  
+- **Low Data Consumption**: Designed to be data-efficient.  
+- **Auto-Categorized Feeds**: News is grouped into specific categories for easy navigation.  
+- **Supports Multiple News Categories**: Includes World News, Entertainment, Business, Technology, and Politics.
 
-## Restful API
+---
 
-<a href=""><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/app/src/main/res/drawable/first.png" align="left" height="125" width="125" ></a>
+## 🌐 RESTful API
 
-The Skynet uses a special Restful API to fetch its news feed from the server. The backend code is written with the help of PHP which will scan the news website and exposed back the news feeds to the application as a simple JSON response.
+<p>
+  <a href=""><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/app/src/main/res/drawable/first.png" align="left" height="125" width="125" alt="SkyNet API"></a>
+</p>
 
+SkyNet Reader utilizes a custom-built RESTful API to fetch news feeds. The backend, written in **PHP**, scans various news websites and exposes the data to the application in **JSON format**.
 
-| New Feed        | API Call
-| ------------- |:-------------:
-| World News      | http://www.spkdroid.com/News/canada.php?type=1
-| Entertainment    | http://www.spkdroid.com/News/canada.php?type=2
-| Business | http://www.spkdroid.com/News/canada.php?type=3
-| Technology      | http://www.spkdroid.com/News/canada.php?type=4
-| Politics    | http://www.spkdroid.com/News/canada.php?type=5
+| **News Feed**     | **API Endpoint**                                      |
+|--------------------|-------------------------------------------------------|
+| World News         | [API Call](http://www.spkdroid.com/News/canada.php?type=1)  |
+| Entertainment      | [API Call](http://www.spkdroid.com/News/canada.php?type=2)  |
+| Business           | [API Call](http://www.spkdroid.com/News/canada.php?type=3)  |
+| Technology         | [API Call](http://www.spkdroid.com/News/canada.php?type=4)  |
+| Politics           | [API Call](http://www.spkdroid.com/News/canada.php?type=5)  |
 
+---
 
-<a href="url"><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/screenshot/screen.png" align="left" height="500" width="275" ></a>
+## 📸 Screenshots
 
+<p align="center">
+  <a href="url"><img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/screenshot/screen.png" height="500" width="275" alt="SkyNet Reader Screenshot"></a>
+</p>
 
-## Getting Started
+---
 
-Just clone and import into the Android Studio. Perform the gradle build and perform a build operation to generate the apk file. <br>
+## 🚀 Getting Started
 
-The apk file can be downloaded from the following link <br>
+### Clone and Build
 
-<strong>
-<a href="http://www.spkdroid.com/News/app.apk">Download Now!!</a>
-</strong>
+1. Clone the repository.  
+2. Import the project into **Android Studio**.  
+3. Perform a Gradle sync and build the project to generate the APK file.  
 
-### Prerequisities
+Alternatively, download the APK directly from:  
+**[Download Now!](http://www.spkdroid.com/News/app.apk)**
 
-```
-Android Studio
-Android 5.0 and above
-```
+---
 
-## Deployment
+## 🛠 Prerequisites
 
-Please enable installation from "unknow source" in your settings to install the apk file.
+- **Android Studio**: Development environment.  
+- **Android 5.0 (Lollipop)** or higher: Minimum supported SDK version.
 
-Please change the minimum SDK version in the gradle file to support the lower android versions.
+### Deployment Notes
 
-## Built With
+- Enable installation from **Unknown Sources** in your device settings to install the APK manually.  
+- To support lower Android versions, modify the **minimum SDK version** in the Gradle file.
 
-Android Studio
-Gradle
-Android SDK 5.0 and above
+---
 
-## Contributing
+## 🛠 Built With
 
-Just submit a pull request.
+- **Android Studio**: Integrated Development Environment (IDE).  
+- **Gradle**: Build system for Android.  
+- **Android SDK**: Targeting API level 21 and above.
 
-## Authors
+---
 
-* **Ramkumar Velmurugan** - <a href="http://www.spkdroid.com/CV/">Portfolio</a>
+## 🤝 Contributing
 
+We welcome contributions! Feel free to submit a pull request to improve the application.
 
+---
 
-## License
+## 👨‍💻 Author
 
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/spkdroid/SkyNet-Reader/blob/master/license.md) file for details
+- **Ramkumar Velmurugan**  
+  [Portfolio](http://www.spkdroid.com/CV/)
 
-## Acknowledgments
+---
 
-* Apache HTTPComponents
-* CustomWebView
-* Volley
+## 📝 License
+
+This project is licensed under the **MIT License**. See the [LICENSE.md](https://github.com/spkdroid/SkyNet-Reader/blob/master/license.md) file for details.
+
+---
+
+## 📚 Acknowledgments
+
+- **Apache HTTPComponents**: For HTTP request handling.  
+- **CustomWebView**: For enhanced web content rendering.  
+- **Volley**: For seamless and efficient API communication.
+
+--- 
