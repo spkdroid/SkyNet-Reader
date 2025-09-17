@@ -41,71 +41,55 @@ android {
 }
 
 dependencies {
-
+    // Core AndroidX
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+    // Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.foundation.android)
     implementation(libs.material)
-    implementation(libs.androidx.junit.ktx)
-    implementation(libs.androidx.ui.test.junit4.android)
-
-    // Testing
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(libs.androidx.core.testing)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Jetpack Compose
-    implementation(libs.ui)
-    implementation(libs.material3)
     implementation(libs.androidx.navigation.compose)
-
+    implementation(libs.androidx.hilt.navigation.compose)
     // Lifecycle & LiveData
-    implementation(libs.androidx.lifecycle.runtime.ktx.v287)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx.v287) // Consider keeping only one
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
-    // Retrofit & Gson (Networking)
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-
-    // Hilt (Dependency Injection)
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-
-    // Image Loading (Choose one: Glide or Coil)
-    implementation(libs.landscapist.glide) // Glide
-    implementation(libs.coil.compose) // Alternative: Coil (comment out if not used)
-
+    implementation(libs.androidx.runtime.livedata)
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
-
-    // Room Database (Offline Storage)
+    // Room Database
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.junit.ktx)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
-
-
+    // Hilt for Dependency Injection
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    // Image Loading (Choose one)
+    implementation(libs.landscapist.glide) // Glide
+    implementation(libs.coil.compose)      // Coil (comment out if not used)
     // Unit Testing
     testImplementation(libs.junit)
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
-
-    // UI Testing
-    androidTestImplementation(libs.ui.test.junit4)
-
-    // Robolectric for Unit Testing
     testImplementation(libs.robolectric)
+    testImplementation("io.mockk:mockk:1.13.7")
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.test.ext:junit:1.1.5")
+    // Instrumentation/UI Testing
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.core.testing)
+    // Debug-only Dependencies
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation(kotlin("test"))
 }

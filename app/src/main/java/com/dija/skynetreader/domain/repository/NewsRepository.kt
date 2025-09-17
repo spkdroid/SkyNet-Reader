@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface NewsRepository {
-    fun getTopHeadlines(newsType: Int): Flow<List<NewsArticle>>
+    suspend fun getTopHeadlines(newsType: Int): Flow<List<NewsArticle>>
 }

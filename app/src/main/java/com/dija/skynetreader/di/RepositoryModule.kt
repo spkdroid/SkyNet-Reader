@@ -1,5 +1,7 @@
 package com.dija.skynetreader.di
 
+import com.dija.skynetreader.data.repository.NewsRepositoryImpl
+import com.dija.skynetreader.domain.repository.NewsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
