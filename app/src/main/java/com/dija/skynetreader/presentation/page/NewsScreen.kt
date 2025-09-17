@@ -38,9 +38,9 @@ fun NewsItemCard(article: NewsArticle) {
             .padding(8.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(text = article.title, style = MaterialTheme.typography.titleMedium)
+            Text(text = article.title ?: "", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
-            Text(text = article.description, style = MaterialTheme.typography.bodyMedium)
+            Text(text = article.description ?: "", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

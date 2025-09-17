@@ -8,7 +8,5 @@ import javax.inject.Inject
 class GetNewsByCategoryUseCase @Inject constructor(
     private val repository: NewsRepository
 ) {
-    suspend operator fun invoke(type: Int): Flow<List<NewsArticle>> {
-        return repository.getTopHeadlines(type)
-    }
+    suspend operator fun invoke(type: Int): Flow<List<NewsArticle>> = repository.getTopHeadlines(type)
 }

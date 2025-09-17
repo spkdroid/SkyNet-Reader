@@ -15,6 +15,10 @@ class NewsViewModel @Inject constructor(
     private val getNewsByCategory: GetNewsByCategoryUseCase
 ) : ViewModel() {
 
+    init {
+        loadNews(1)
+    }
+
     private val _articles = MutableStateFlow<List<NewsArticle>>(emptyList())
     val articles: StateFlow<List<NewsArticle>> = _articles
 
