@@ -31,11 +31,11 @@ sealed class Screen(val route: String) {
     companion object {
         /** Ordered list that drives the BottomNavigationBar. */
         val bottomNavItems: List<BottomNavItem> = listOf(
-            BottomNavItem(Dashboard.route,  "Home",      Icons.Filled.Dashboard),
-            BottomNavItem(Feed.route,       "News",      Icons.Filled.Home),
-            BottomNavItem(Chat.route,       "AI Chat",   Icons.Filled.AutoAwesome),
-            BottomNavItem(Search.route,     "Search",    Icons.Filled.Search),
-            BottomNavItem(Bookmarks.route,  "Bookmarks", Icons.Filled.Bookmark),
+            BottomNavItem("dashboard",  "Home",      Icons.Filled.Dashboard),
+            BottomNavItem("feed",       "News",      Icons.Filled.Home),
+            BottomNavItem("chat",       "AI Chat",   Icons.Filled.AutoAwesome),
+            BottomNavItem("search",     "Search",    Icons.Filled.Search),
+            BottomNavItem("bookmarks",  "Bookmarks", Icons.Filled.Bookmark),
         )
 
         /** Routes where the bottom nav should be visible. */

@@ -10,24 +10,18 @@ import com.google.gson.annotations.SerializedName
  * model [NewsArticle] by [NewsRemoteDataSource].
  */
 data class NewsDto(
-    @SerializedName("id")
-    val id: String? = null,
-
     @SerializedName("title")
     val title: String? = null,
 
-    @SerializedName("newsline")
+    @SerializedName("description")
     val newsLine: String? = null,
 
-    @SerializedName("url")
+    @SerializedName("link")
     val url: String? = null,
 
-    @SerializedName("image")
+    @SerializedName("temp")
     val imageUrl: String? = null,
 
     @SerializedName("date")
-    val date: String? = null,
-
-    @SerializedName("type")
-    val type: Int? = null
+    val date: String? = null
 )

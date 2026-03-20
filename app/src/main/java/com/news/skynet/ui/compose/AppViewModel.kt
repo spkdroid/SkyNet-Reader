@@ -34,7 +34,7 @@ class AppViewModel @Inject constructor(
      * is no flash of the wrong start destination.
      */
     val onboardingComplete = dataStore.data
-        .map { it[KEY_ONBOARDING_COMPLETE] }         // null while loading
+        .map { it[KEY_ONBOARDING_COMPLETE] ?: false }
         .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
 
     val isDarkMode = dataStore.data

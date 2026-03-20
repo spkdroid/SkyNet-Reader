@@ -18,10 +18,18 @@ class NewsRemoteDataSource @Inject constructor(
     private val api: NewsApiService
 ) {
     suspend fun getNewsFeed(category: NewsCategory): NetworkResult<List<NewsArticle>> =
-        safeApiCall { api.getNewsFeed(category.apiType).map { it.toDomain(category) } }
+        safeApiCall {
+            api.getNewsFeed(category.apiType)
+                .filter { !it.title.isNullOrBlank() }
+                .map { it.toDomain(category) }
+        }
 
     suspend fun searchArticles(query: String): NetworkResult<List<NewsArticle>> =
-        safeApiCall { api.searchArticles(query).map { it.toDomainUnknownCategory() } }
+        safeApiCall {
+            api.searchArticles(query)
+                .filter { !it.title.isNullOrBlank() }
+                .map { it.toDomainUnknownCategory() }
+        }
 
     // -------------------------------------------------------------------------
     // Helpers
@@ -40,7 +48,7 @@ class NewsRemoteDataSource @Inject constructor(
         }
 
     private fun NewsDto.toDomain(category: NewsCategory) = NewsArticle(
-        id          = id ?: url.orEmpty(),
+        id          = url.orEmpty(),
         title       = title.orEmpty(),
         summary     = newsLine.orEmpty(),
         url         = url.orEmpty(),
@@ -50,12 +58,12 @@ class NewsRemoteDataSource @Inject constructor(
     )
 
     private fun NewsDto.toDomainUnknownCategory() = NewsArticle(
-        id          = id ?: url.orEmpty(),
+        id          = url.orEmpty(),
         title       = title.orEmpty(),
         summary     = newsLine.orEmpty(),
         url         = url.orEmpty(),
         imageUrl    = imageUrl.orEmpty(),
         publishedAt = date.orEmpty(),
-        category    = NewsCategory.fromApiType(type ?: 1)
+        category    = NewsCategory.fromApiType(1)
     )
 }
