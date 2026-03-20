@@ -115,6 +115,17 @@ fun SkyNetNavGraph(
 
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
+                    onArticleClick = { article ->
+                        selectedArticleVm.select(article)
+                        navController.navigate(Screen.ArticleDetail.route)
+                    },
+                    onNavigateToFeed      = {
+                        navController.navigate(Screen.Feed.route) {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState    = true
+                        }
+                    },
                     onNavigateToChat      = { navController.navigate(Screen.Chat.route) },
                     onNavigateToSearch    = { navController.navigate(Screen.Search.route) },
                     onNavigateToBookmarks = { navController.navigate(Screen.Bookmarks.route) }
