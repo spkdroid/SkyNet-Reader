@@ -1,0 +1,14 @@
+<resources>
+
+    <!-- Material Design 3 Dark theme — applied automatically when system dark mode is ON -->
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimaryDark_night</item>
+        <item name="colorOnPrimary">@color/colorOnPrimaryDark_night</item>
+        <item name="colorPrimaryContainer">@color/colorPrimaryContainerDark_night</item>
+        <item name="colorSurface">@color/colorSurfaceDark_night</item>
+        <item name="colorOnSurface">@color/colorOnSurfaceDark_night</item>
+        <item name="colorSurfaceVariant">@color/colorSurfaceVariantDark_night</item>
+        <item name="colorError">#FFB4AB</item>
+    </style>
+
+</resources>

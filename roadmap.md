@@ -1,0 +1,700 @@
+# SkyNet Reader — State-of-the-Art Android News App Roadmap
+
+> Last updated: March 19, 2026
+
+---
+
+## Implementation Status
+
+| Phase | Status | Completed On | Notes |
+|---|---|---|---|
+| Phase 1 — Foundation & Modernization | ✅ **COMPLETE** | March 19, 2026 | Kotlin migration, MVVM, Hilt, Retrofit, Room, Coil, ViewPager2, Navigation, MD3 |
+| Phase 2 — Core Feature Set | ✅ **COMPLETE** | March 19, 2026 | Offline-first caching, ArticleDetail, Bookmarks, Search, Dark Mode, Onboarding, Settings, WorkManager background sync |
+| Phase 3 — Enhanced UX & UI Polish | 🔲 Not started | — | Paging 3, MotionLayout, shared element transitions, shimmer polish |
+| Phase 4 — Advanced & Intelligent Features | 🔲 Not started | — | FCM, Widget, AI summaries, Firebase Analytics |
+| Phase 5 — Quality, Testing & Distribution | 🔲 Not started | — | CI/CD, Baseline Profiles, full Espresso coverage |
+
+### Recently completed additions (Phase 2 extras)
+
+| Item | File(s) | Description |
+|---|---|---|
+| Safe Args plugin | `build.gradle`, `app/build.gradle` | Type-safe navigation argument passing |
+| WorkManager background sync | `worker/NewsRefreshWorker.kt`, `AppController.kt` | Periodic 6-hour news refresh on Wi-Fi |
+| WorkManager + Hilt | `AppController.kt`, `AndroidManifest.xml` | `HiltWorkerFactory` wired via `Configuration.Provider`; default init disabled |
+| ProGuard rules | `proguard-rules.pro` | Keep rules for Retrofit, Room, Hilt, Coil, Lottie, Firebase, WorkManager |
+| Settings screen | `ui/settings/SettingsFragment.kt`, `SettingsViewModel.kt`, `fragment_settings.xml` | Dark mode toggle, font size slider, notification pref, cache clear |
+| Legacy Java removal | — | Deleted 8 src/main .java files that conflicted with new Kotlin equivalents |
+
+---
+
+## Current State Assessment
+
+The app was originally built in 2016 and targets Android API 25. Below is a summary of the legacy
+tech debt that every phase in this roadmap will address.
+
+| Area | Current State | Problem |
+|---|---|---|
+| Architecture | None (Activity/Fragment God classes) | Untestable, tightly coupled |
+| UI components | `ListView` + `BaseAdapter` | No DiffUtil, no view recycling optimization |
+| Networking | Volley | No coroutine/Flow support, no interceptors |
+| Image loading | Picasso 2.5.2 | Outdated, no Compose support |
+| Support libraries | `android.support.*` (pre-AndroidX) | Deprecated since 2018 |
+| Target SDK | 25 (Android 7.1) | App will be delisted from Play Store |
+| Language | Java only | No Kotlin coroutines, no Flow, no DSLs |
+| Data persistence | None | No offline reading |
+| Dependency injection | None (manual singletons) | Hard to test and scale |
+| Testing | Placeholder tests only | Zero test coverage |
+| API URLs | Hard-coded in `PagerAdapter.java` | Not configurable, not maintainable |
+| UI framework | XML layouts + ViewPager | No Jetpack Compose support |
+| Theming | Single light theme | No dark mode, no Material You |
+
+---
+
+## Design Patterns & Architecture
+
+The entire application will follow **Clean Architecture** with **MVVM** at the presentation layer.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Presentation Layer                      │
+│   Activity / Fragment / Composable  ◄──►  ViewModel         │
+│                  (observe StateFlow / LiveData)              │
+└────────────────────────┬────────────────────────────────────┘
+                         │ calls
+┌────────────────────────▼────────────────────────────────────┐
+│                       Domain Layer                          │
+│          Use Cases (GetNewsFeedUseCase, BookmarkUseCase…)   │
+│                    Plain Kotlin classes                     │
+└────────────────────────┬────────────────────────────────────┘
+                         │ calls
+┌────────────────────────▼────────────────────────────────────┐
+│                        Data Layer                           │
+│    Repository  ◄──►  Remote DataSource (Retrofit)           │
+│                ◄──►  Local DataSource  (Room)               │
+│                ◄──►  Preferences DataSource (DataStore)     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Patterns Used
+
+| Pattern | Where Applied |
+|---|---|
+| **MVVM** | All screens — ViewModel exposes `StateFlow<UiState>` |
+| **Repository** | `NewsRepository`, `BookmarkRepository` — single source of truth |
+| **Use Case / Interactor** | One class per business action (`GetFeedUseCase`, `SearchNewsUseCase`) |
+| **Observer (StateFlow/LiveData)** | UI reacts to state changes without polling |
+| **Dependency Injection (Hilt)** | All ViewModels, repositories, data sources wired via Hilt modules |
+| **Builder / DSL** | Retrofit & OkHttp client configuration |
+| **Adapter (RecyclerView ListAdapter)** | News list with `DiffUtil` for efficient updates |
+| **Singleton** | Application-scoped objects managed by Hilt — no manual singletons |
+| **Factory** | `ViewModelFactory` auto-generated by Hilt |
+| **Strategy** | Swappable `ImageLoader` interface (Coil / Glide) behind an abstraction |
+| **Single Activity** | One `MainActivity`, all screens are Fragments or Composables |
+
+---
+
+## Phase 1 — Foundation & Modernization ✅ COMPLETE
+
+> Goal: Make the project compilable, buildable, and testable on modern tooling before adding features.
+> **Status: Fully implemented — March 19, 2026**
+
+### Implementation Notes — Phase 1
+
+All legacy Java files have been replaced with idiomatic Kotlin. The full MVVM + Clean Architecture
+skeleton is in place. The app now targets the latest Android SDK and uses only AndroidX libraries.
+
+**New file tree created:**
+```
+app/src/main/java/com/news/skynet/
+├── AppController.kt                    ← replaces AppController.java (@HiltAndroidApp)
+├── MainActivity.kt                     ← replaces MainActivity.java (ViewPager2 + NavComponent)
+├── di/
+│   ├── AppModule.kt                    ← DataStore binding
+│   ├── NetworkModule.kt                ← OkHttp + Retrofit + NewsApiService
+│   └── DatabaseModule.kt              ← Room database + DAO bindings
+├── domain/
+│   ├── model/
+│   │   ├── NewsArticle.kt              ← @Parcelize data class (replaces News.java)
+│   │   └── NewsCategory.kt            ← Enum (replaces hard-coded URLs in PagerAdapter)
+│   └── usecase/
+│       ├── GetNewsFeedUseCase.kt
+│       ├── SearchNewsUseCase.kt
+│       ├── BookmarkArticleUseCase.kt
+│       └── GetBookmarksUseCase.kt
+├── data/
+│   ├── remote/
+│   │   ├── NewsApiService.kt           ← Retrofit interface (replaces Volley)
+│   │   ├── NewsDto.kt
+│   │   └── NewsRemoteDataSource.kt
+│   ├── local/
+│   │   ├── NewsDatabase.kt             ← Room DB
+│   │   ├── NewsDao.kt
+│   │   ├── NewsEntity.kt
+│   │   ├── BookmarkDao.kt
+│   │   └── BookmarkEntity.kt
+│   └── repository/
+│       ├── NewsRepository.kt           ← offline-first strategy
+│       └── BookmarkRepository.kt
+├── util/
+│   └── NetworkResult.kt               ← sealed class: Loading / Success / Error
+└── ui/
+    ├── feed/
+    │   ├── NewsFeedFragment.kt         ← replaces NewsFeed.java (RecyclerView + StateFlow)
+    │   ├── NewsFeedViewModel.kt        ← @HiltViewModel
+    │   ├── NewsFeedUiState.kt
+    │   ├── NewsFeedAdapter.kt          ← ListAdapter + DiffUtil (replaces Newsfeedadapter.java)
+    │   └── NewsPagerAdapter.kt         ← FragmentStateAdapter (replaces PagerAdapter.java)
+    ├── detail/
+    │   ├── ArticleDetailFragment.kt
+    │   └── ArticleDetailViewModel.kt
+    ├── search/
+    │   ├── SearchFragment.kt
+    │   └── SearchViewModel.kt
+    ├── bookmarks/
+    │   ├── BookmarksFragment.kt
+    │   └── BookmarksViewModel.kt
+    └── onboarding/
+        ├── OnboardingActivity.kt       ← replaces Splash.java (DataStore + ViewPager2)
+        └── OnboardingPagerAdapter.kt
+```
+
+**Files deleted:**
+- `adapter/AppController.java`
+- `adapter/LruBitmapCache.java`
+- `adapter/Newsfeedadapter.java`
+- `bean/News.java`
+- `fragment/NewsFeed.java`
+- `viewpager/PagerAdapter.java`
+- `splash/Splash.java`
+
+**Resources updated:**
+- `res/values/styles.xml` → Material Design 3 `Theme.Material3.Light.NoActionBar`
+- `res/values-night/styles.xml` → `Theme.Material3.Dark.NoActionBar`
+- `res/values/colors.xml` → MD3 token-based colour system + dark mode colours
+- `res/values/strings.xml` → cleaned up, added accessibility strings
+- `res/layout/activity_main.xml` → AndroidX DrawerLayout + NavigationView
+- `res/layout/app_bar_main.xml` → androidx CoordinatorLayout + AppBarLayout + BottomNavigationView
+- `res/layout/content_main.xml` → ViewPager2 + NavHostFragment
+- `res/layout/fragment_news_feed.xml` → NEW: RecyclerView + ShimmerLayout (was fragment_login.xml with ListView)
+- `res/layout/item_news_card.xml` → NEW: MaterialCardView (replaces contact_item.xml)
+- `res/layout/fragment_article_detail.xml` → NEW: WebView + FABs
+- `res/layout/fragment_bookmarks.xml` → NEW
+- `res/layout/fragment_search.xml` → NEW
+- `res/layout/activity_onboarding.xml` → NEW: ViewPager2 + Lottie
+- `res/layout/item_onboarding_page.xml` → NEW
+- `res/layout/item_shimmer_placeholder.xml` → NEW
+- `res/navigation/nav_graph.xml` → NEW: Jetpack Navigation graph
+- `res/menu/bottom_nav_menu.xml` → NEW: Home / Search / Bookmarks
+- `res/menu/activity_main_drawer.xml` → Updated with correct navigation IDs
+- `res/drawable/ic_bookmark_outline.xml` → NEW vector
+- `res/drawable/ic_bookmark_filled.xml` → NEW vector
+- `res/drawable/ic_share.xml` → NEW vector
+- `res/drawable/ic_home.xml` → NEW vector
+- `res/drawable/ic_search.xml` → NEW vector
+- `res/drawable/ic_arrow_back.xml` → NEW vector
+- `res/drawable/placeholder_news.xml` → NEW: Coil image placeholder
+- `res/anim/slide_in_right.xml` → NEW: navigation transition
+- `res/anim/slide_out_left.xml` → NEW: navigation transition
+- `res/anim/slide_in_left.xml` → NEW: navigation transition
+- `res/anim/slide_out_right.xml` → NEW: navigation transition
+- `res/xml/backup_rules.xml` → NEW
+- `res/xml/data_extraction_rules.xml` → NEW
+- `AndroidManifest.xml` → namespace-style manifest, Hilt app class, OnboardingActivity as launcher
+
+**Tests added:**
+- `test/usecase/GetNewsFeedUseCaseTest.kt`
+- `test/viewmodel/NewsFeedViewModelTest.kt`
+- `androidTest/HiltTestRunner.kt`
+
+
+
+### 1.1 Kotlin Migration
+
+**Files changed:**
+- All `.java` files converted to `.kt`
+- `build.gradle` → `build.gradle.kts`
+
+**Changes:**
+```
+MainActivity.java          → MainActivity.kt
+NewsFeed.java              → NewsFeedFragment.kt
+Newsfeedadapter.java       → NewsFeedAdapter.kt  (RecyclerView.Adapter)
+News.java                  → News.kt             (data class)
+AppController.java         → AppController.kt    (refactored to Hilt)
+LruBitmapCache.java        → removed             (Coil handles caching)
+PagerAdapter.java          → NewsPagerAdapter.kt (ViewPager2)
+Splash.java                → OnboardingActivity.kt
+```
+
+### 1.2 AndroidX & SDK Upgrade
+
+**Files changed:** `app/build.gradle`
+
+```groovy
+// Before
+compileSdkVersion 25
+targetSdkVersion 25
+compile 'com.android.support:appcompat-v7:23.4.0'
+compile 'com.android.support:design:23.4.0'
+
+// After
+compileSdk 35
+targetSdk 35
+implementation 'androidx.appcompat:appcompat:1.7.0'
+implementation 'com.google.android.material:material:1.12.0'
+```
+
+All `android.support.*` imports replaced with `androidx.*` equivalents across every source file.
+
+### 1.3 Dependency Injection — Hilt
+
+**New files:**
+```
+di/
+  AppModule.kt          (provides Retrofit, OkHttp, Room, DataStore)
+  NetworkModule.kt
+  DatabaseModule.kt
+```
+
+`AppController.kt` annotated with `@HiltAndroidApp`. All manual `getInstance()` singleton calls removed.
+
+### 1.4 Networking — Retrofit + OkHttp + Kotlin Coroutines
+
+**Files changed / added:**
+```
+network/
+  NewsApiService.kt         (Retrofit interface with suspend functions)
+  NewsDto.kt                (JSON response data class)
+  NewsRemoteDataSource.kt
+  NetworkResult.kt          (sealed class: Success / Error / Loading)
+```
+
+Volley dependency removed. OkHttp logging interceptor added for debug builds.
+
+### 1.5 Image Loading — Coil
+
+Replace Picasso with **Coil** (Kotlin-first, coroutine-backed).
+
+```kotlin
+// Before (Picasso)
+Picasso.with(context).load(url).into(imageView)
+
+// After (Coil)
+imageView.load(url) {
+    crossfade(true)
+    placeholder(R.drawable.placeholder)
+    error(R.drawable.error_image)
+}
+```
+
+`LruBitmapCache.java` deleted. Coil manages its own disk + memory cache.
+
+### 1.6 ListView → RecyclerView + ListAdapter
+
+**Files changed:**
+- `fragment_login.xml` → renamed `fragment_news_feed.xml`, `ListView` replaced with `RecyclerView`
+- `contact_item.xml` → `item_news_card.xml` (Material Card design)
+- `Newsfeedadapter.java` → `NewsFeedAdapter.kt` extends `ListAdapter<News, NewsViewHolder>` with `DiffUtil`
+
+### 1.7 ViewPager → ViewPager2
+
+**Files changed:**
+- `activity_main.xml` — replace `ViewPager` tag with `ViewPager2`
+- `PagerAdapter.java` → `NewsPagerAdapter.kt` extends `FragmentStateAdapter`
+- Hard-coded URLs moved to `NewsCategory` enum / constants file
+
+### 1.8 Architecture — MVVM + Repository
+
+**New files:**
+```
+data/
+  local/
+    NewsDatabase.kt
+    NewsDao.kt
+    NewsEntity.kt
+  remote/
+    NewsApiService.kt
+    NewsRemoteDataSource.kt
+  repository/
+    NewsRepository.kt
+    BookmarkRepository.kt
+domain/
+  model/
+    NewsArticle.kt
+  usecase/
+    GetNewsFeedUseCase.kt
+    SearchNewsUseCase.kt
+    BookmarkArticleUseCase.kt
+    GetBookmarksUseCase.kt
+ui/
+  feed/
+    NewsFeedFragment.kt
+    NewsFeedViewModel.kt
+    NewsFeedUiState.kt
+  detail/
+    ArticleDetailFragment.kt
+    ArticleDetailViewModel.kt
+  search/
+    SearchFragment.kt
+    SearchViewModel.kt
+  bookmarks/
+    BookmarksFragment.kt
+    BookmarksViewModel.kt
+  settings/
+    SettingsFragment.kt
+```
+
+---
+
+## Phase 2 — Core Feature Set
+
+> Goal: Deliver the features users expect from a competitive news reader in 2026.
+
+### 2.1 Offline Reading — Room Database
+
+**New files:** `NewsDatabase.kt`, `NewsDao.kt`, `NewsEntity.kt`
+
+- Articles fetched from API are cached in Room
+- `NewsRepository` returns cached data when network is unavailable
+- Cached articles expire after 24 hours (configurable)
+- Strategy: **offline-first** — Room is always the single source of truth; Retrofit updates it in the background
+
+**AndroidManifest.xml change:** Add `android.permission.RECEIVE_BOOT_COMPLETED` for background sync.
+
+### 2.2 Article Detail Screen
+
+**New files:** `ArticleDetailFragment.kt`, `fragment_article_detail.xml`
+
+- In-app article reader using `WebView` with JavaScript injection to strip ads/nav
+- "Reader Mode" toggle that strips the page to title + body text using `Readability.js`
+- Share button using `Intent.ACTION_SEND`
+- Estimated reading time shown in toolbar subtitle
+- Font size adjustment (Small / Medium / Large)
+
+### 2.3 Bookmarks / Saved Articles
+
+**New files:** `BookmarksFragment.kt`, `BookmarkRepository.kt`, `BookmarkDao.kt`
+
+- Long-press or bookmark icon on each news card saves article to Room `bookmarks` table
+- Dedicated Bookmarks screen accessible from Navigation Drawer
+- Swipe-to-delete on bookmark list with undo Snackbar
+
+### 2.4 Search
+
+**New files:** `SearchFragment.kt`, `SearchViewModel.kt`
+
+- `SearchView` in toolbar with real-time filtering
+- Searches both cached local articles and remote API
+- Recent searches stored in `DataStore<Preferences>` (replaces `SharedPreferences`)
+- Search results highlighted with `SpannableString`
+
+### 2.5 Dark Mode & Material You Theming
+
+**Files changed:**
+- `res/values/styles.xml` → migrated to Material Design 3 `Theme.Material3.Light`
+- `res/values-night/styles.xml` → new `Theme.Material3.Dark`
+- `res/values/colors.xml` → token-based color system
+
+```kotlin
+// SettingsFragment.kt — dynamic theme toggle
+AppCompatDelegate.setDefaultNightMode(
+    if (darkMode) AppCompatDelegate.MODE_NIGHT_YES
+    else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+)
+```
+
+Dynamic Color (Material You) enabled on Android 12+:
+```kotlin
+// MainActivity.kt
+DynamicColors.applyToActivityIfAvailable(this)
+```
+
+### 2.6 Onboarding Redesign
+
+**Files changed:** `OnboardingActivity.kt` (replaces `Splash.java`)
+
+- Remove `AndroidOnboarder` third-party dependency
+- Build onboarding with `ViewPager2` + Lottie animations
+- Show only on first launch using `DataStore` flag
+- Screens: Welcome → Categories picker → Notifications opt-in → Go
+
+---
+
+## Phase 3 — Enhanced UX & UI Polish
+
+> Goal: Elevate the visual experience to match top-tier news apps (Flipboard, Feedly, Google News).
+
+### 3.1 News Card Redesign
+
+**Files changed:** `item_news_card.xml`
+
+- `MaterialCardView` with rounded corners and elevation
+- Hero image at top (16:9 ratio) using `ShapeableImageView`
+- Category chip badge (colored per category)
+- Author + source logo row
+- Relative timestamp ("2 hours ago" using `DateUtils.getRelativeTimeSpanString`)
+- Bookmark icon toggle on card
+
+### 3.2 Animated Transitions
+
+**Files changed:** `MainActivity.kt`, all Fragment files
+
+- Shared element transitions on article image when opening detail screen
+- `MotionLayout` for collapsible toolbar in detail view
+- Slide-in animation for drawer using `MaterialFadeThrough`
+- Skeleton loading screen (shimmering placeholder) instead of `ProgressDialog`
+
+### 3.3 Bottom Navigation (Optional Layout Mode)
+
+**New files:** `res/menu/bottom_nav_menu.xml`, `res/navigation/nav_graph.xml`
+
+- Jetpack Navigation Component replaces manual fragment transactions
+- `BottomNavigationView` with items: Home, Search, Bookmarks, Settings
+- Navigation Drawer retained for category selection on tablets
+
+### 3.4 Pagination — Paging 3
+
+**Files changed:** `NewsFeedViewModel.kt`, `NewsFeedAdapter.kt`
+
+- Replace manual list loading with `Paging 3` library
+- `NewsFeedPagingSource.kt` handles page fetching from API
+- `LoadStateAdapter` shows loading / error footers
+- `RemoteMediator` syncs pages to Room for offline access
+
+### 3.5 Pull-to-refresh Refinement
+
+**Files changed:** `fragment_news_feed.xml`, `NewsFeedFragment.kt`
+
+- Replace `SwipeRefreshLayout` with `PullRefreshIndicator` from Material library
+- Refresh also triggers a background Room cache invalidation
+- Visual "New articles available" banner instead of forcing scroll to top
+
+---
+
+## Phase 4 — Advanced & Intelligent Features
+
+> Goal: Differentiate SkyNet Reader with smart, personalized and proactive functionality.
+
+### 4.1 Push Notifications — Firebase Cloud Messaging (FCM)
+
+**New files:** `SkyNetFirebaseMessagingService.kt`, `NotificationHelper.kt`
+
+- `AndroidManifest.xml`: Add `SkyNetFirebaseMessagingService` service entry
+- Per-category notification channels (Android 8.0+ `NotificationChannel`)
+- Users subscribe/unsubscribe per category in Settings
+- Breaking news notifications with deep-link into `ArticleDetailFragment`
+
+**`build.gradle` additions:**
+```gradle
+implementation platform('com.google.firebase:firebase-bom:33.x.x')
+implementation 'com.google.firebase:firebase-messaging-ktx'
+```
+
+### 4.2 Personalized Feed
+
+**New files:** `PersonalizationEngine.kt`, `UserPreferenceRepository.kt`
+
+- Track article open count per category in Room
+- `PersonalizationEngine` re-ranks feed items based on interest score
+- "Because you read…" section injected into home feed
+- Preference data stored locally only (privacy-first; no cloud upload without consent)
+
+### 4.3 AI-Powered Article Summaries
+
+**New files:** `SummaryRepository.kt`, `SummaryApiService.kt`
+
+- "TL;DR" button on `ArticleDetailFragment` calls a summarization API (configurable endpoint)
+- Response cached in Room to avoid redundant API calls
+- On-device option using **ML Kit** language models for supported devices
+
+### 4.4 Multi-Source RSS / API Support
+
+**New files:** `RssParser.kt`, `SourceManagerFragment.kt`, `SourceEntity.kt`
+
+- Users add custom RSS feeds or News API sources from Settings
+- `RssParser` uses `org.xmlpull.v1.XmlPullParser` (no extra dependency needed)
+- Fetched sources merged and de-duplicated in `NewsRepository`
+- Per-source color coding on news cards
+
+### 4.5 Firebase Analytics & Crashlytics
+
+**New files:** `AnalyticsHelper.kt`
+
+**`build.gradle` additions:**
+```gradle
+implementation 'com.google.firebase:firebase-analytics-ktx'
+implementation 'com.google.firebase:firebase-crashlytics-ktx'
+```
+
+- Custom events: `article_opened`, `article_bookmarked`, `category_switched`, `search_performed`
+- Crashlytics enabled for all release builds in `build.gradle`
+- Non-fatal errors (network failures, parse errors) logged with context
+
+### 4.6 Home Screen Widget
+
+**New files:** `NewsWidgetProvider.kt`, `res/layout/widget_news.xml`, `res/xml/news_widget_info.xml`
+
+- `AppWidgetProvider` subclass showing the latest 3 headlines
+- Tapping a headline deep-links to `ArticleDetailFragment`
+- Widget refreshes every 30 minutes using `AppWidgetManager`
+- `AndroidManifest.xml`: Register `<receiver>` for widget provider
+
+---
+
+## Phase 5 — Quality, Testing & Distribution
+
+> Goal: Ship a production-grade app with confidence.
+
+### 5.1 Unit Testing
+
+**New files under `test/`:**
+```
+usecase/GetNewsFeedUseCaseTest.kt
+repository/NewsRepositoryTest.kt
+viewmodel/NewsFeedViewModelTest.kt
+```
+
+- **JUnit 5** + **MockK** for mocking
+- All Use Cases tested in isolation (no Android framework)
+- ViewModels tested with `kotlinx-coroutines-test` and `turbine` for Flow assertions
+
+### 5.2 UI / Integration Testing
+
+**New files under `androidTest/`:**
+```
+feed/NewsFeedFragmentTest.kt
+search/SearchFragmentTest.kt
+detail/ArticleDetailFragmentTest.kt
+```
+
+- **Espresso** for UI interactions
+- **Hilt testing** with `@HiltAndroidTest`
+- Screenshot comparison tests using **Paparazzi**
+
+### 5.3 CI/CD — GitHub Actions
+
+**New file:** `.github/workflows/android.yml`
+
+```yaml
+on: [push, pull_request]
+jobs:
+  build:
+    steps:
+      - Checkout
+      - Setup JDK 17
+      - Run unit tests
+      - Run lint
+      - Build release APK / AAB
+      - Upload artifacts
+```
+
+### 5.4 Build Optimizations
+
+**Files changed:** `app/build.gradle`
+
+```kotlin
+buildTypes {
+    release {
+        minifyEnabled = true
+        shrinkResources = true
+        proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        signingConfig = signingConfigs.getByName("release")
+    }
+}
+```
+
+- R8 full-mode enabled for aggressive dead-code removal
+- App Bundle (`.aab`) output for Play Store instead of APK
+- Baseline Profiles added for 30% faster startup
+
+### 5.5 Accessibility
+
+- All interactive elements have `contentDescription`
+- Minimum touch target 48×48 dp enforced
+- `TalkBack` traversal order set via `android:accessibilityTraversalAfter`
+- Test with `AccessibilityChecks.enable()` in Espresso tests
+
+---
+
+## Dependency Summary — Before vs After
+
+| Library | Before | After |
+|---|---|---|
+| Language | Java | Kotlin |
+| Min SDK | 19 | 24 |
+| Target SDK | 25 | 35 |
+| Support libs | `android.support.*` | `androidx.*` |
+| Networking | Volley 1.0.0 | Retrofit 2.x + OkHttp 4.x |
+| Image loading | Picasso 2.5.2 | Coil 2.x |
+| Architecture | None | MVVM + Clean Architecture |
+| DI | Manual singletons | Hilt |
+| Database | None | Room 2.x |
+| Preferences | SharedPreferences | DataStore |
+| UI lists | ListView + BaseAdapter | RecyclerView + ListAdapter / Paging 3 |
+| Navigation | Manual FragmentManager | Jetpack Navigation Component |
+| Paging | None | Paging 3 |
+| Async | Callbacks | Kotlin Coroutines + StateFlow |
+| Notifications | None | FCM + NotificationChannel |
+| Analytics | None | Firebase Analytics + Crashlytics |
+| Testing | JUnit 4 (empty) | JUnit 5 + MockK + Espresso + Turbine |
+| CI/CD | Travis CI (badge only) | GitHub Actions |
+| Theming | Single light theme, XML | Material Design 3, Dark Mode, Material You |
+
+---
+
+## File Change Summary
+
+### Files Deleted
+| File | Reason |
+|---|---|
+| `adapter/LruBitmapCache.java` | Replaced by Coil's built-in cache |
+| `adapter/AppController.java` | Replaced by Hilt `@HiltAndroidApp` |
+
+### Files Renamed / Converted
+| Old | New |
+|---|---|
+| `MainActivity.java` | `MainActivity.kt` |
+| `fragment/NewsFeed.java` | `ui/feed/NewsFeedFragment.kt` |
+| `adapter/Newsfeedadapter.java` | `ui/feed/NewsFeedAdapter.kt` |
+| `bean/News.java` | `domain/model/NewsArticle.kt` |
+| `viewpager/PagerAdapter.java` | `ui/feed/NewsPagerAdapter.kt` |
+| `splash/Splash.java` | `ui/onboarding/OnboardingActivity.kt` |
+| `res/layout/fragment_login.xml` | `res/layout/fragment_news_feed.xml` |
+| `res/layout/contact_item.xml` | `res/layout/item_news_card.xml` |
+
+### New Files Added (High-level)
+```
+di/                         Hilt modules
+data/local/                 Room DB, DAOs, Entities
+data/remote/                Retrofit service, DTOs
+data/repository/            NewsRepository, BookmarkRepository
+domain/model/               NewsArticle data class
+domain/usecase/             Use case classes per feature
+ui/feed/                    ViewModel, UiState, Adapter
+ui/detail/                  Article detail screen
+ui/search/                  Search screen
+ui/bookmarks/               Bookmarks screen
+ui/settings/                Settings screen
+ui/onboarding/              New onboarding screens
+notification/               FCM service, NotificationHelper
+widget/                     Home screen widget provider
+analytics/                  AnalyticsHelper
+.github/workflows/          GitHub Actions CI/CD
+```
+
+---
+
+## Phase Delivery Timeline
+
+| Phase | Scope | Estimated Effort |
+|---|---|---|
+| Phase 1 — Foundation | Kotlin, AndroidX, Hilt, Retrofit, MVVM skeleton | 3–4 weeks |
+| Phase 2 — Core Features | Offline, Detail, Bookmarks, Search, Dark Mode | 3–4 weeks |
+| Phase 3 — UX Polish | Card redesign, animations, Paging 3, Bottom Nav | 2–3 weeks |
+| Phase 4 — Advanced | FCM, Personalization, AI summaries, Widget, Analytics | 4–5 weeks |
+| Phase 5 — Quality | Unit tests, UI tests, CI/CD, Baseline Profiles | 2–3 weeks |
+| **Total** | | **~14–19 weeks** |
+
+---
+
+*This roadmap is a living document. Update phase statuses and mark items complete as development progresses.*

@@ -7,11 +7,63 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# Add any project specific keep options here:
+# ── Retrofit ──────────────────────────────────────────────────────────────────
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ── OkHttp ────────────────────────────────────────────────────────────────────
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+# ── Gson ──────────────────────────────────────────────────────────────────────
+-keep class com.google.gson.** { *; }
+-keepattributes *Annotation*
+-keep class sun.misc.Unsafe { *; }
+
+# ── App DTO / domain models (required for JSON de-serialisation) ──────────────
+-keep class com.news.skynet.data.remote.NewsDto { *; }
+-keep class com.news.skynet.domain.model.** { *; }
+-keep class com.news.skynet.data.local.** { *; }
+
+# ── Room ──────────────────────────────────────────────────────────────────────
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep @androidx.room.Dao class * { *; }
+-keep @androidx.room.Entity class * { *; }
+
+# ── Hilt ──────────────────────────────────────────────────────────────────────
+-dontwarn dagger.hilt.**
+-keep class dagger.hilt.** { *; }
+-keep @dagger.hilt.android.HiltAndroidApp class * extends android.app.Application
+
+# ── Navigation Safe Args ──────────────────────────────────────────────────────
+-keepnames class * extends android.os.Parcelable
+-keepnames class * extends java.io.Serializable
+
+# ── Coil ──────────────────────────────────────────────────────────────────────
+-dontwarn coil.**
+
+# ── Lottie ────────────────────────────────────────────────────────────────────
+-dontwarn com.airbnb.lottie.**
+-keep class com.airbnb.lottie.** { *; }
+
+# ── Firebase ──────────────────────────────────────────────────────────────────
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
+# ── WorkManager ───────────────────────────────────────────────────────────────
+-keep class * extends androidx.work.Worker
+-keep class * extends androidx.work.CoroutineWorker
+-keep class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
+
+# ── WebView JavaScript interface (for article detail) ────────────────────────
+-keepclassmembers class com.news.skynet.ui.detail.ArticleDetailFragment {
+    @android.webkit.JavascriptInterface <methods>;
+}
