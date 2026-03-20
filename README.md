@@ -30,7 +30,7 @@ Today, SkyNet Reader serves as both a real-world news reader and a reference pro
 ## Screenshot
 
 <p align="center">
-  <img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/screenshot/screen.png" height="500" width="275" alt="SkyNet Reader Screenshot">
+  <img src="https://github.com/spkdroid/SkyNet-Reader/blob/master/screenshot/screen.png" height="700" width="275" alt="SkyNet Reader Screenshot">
 </p>
 
 ---
