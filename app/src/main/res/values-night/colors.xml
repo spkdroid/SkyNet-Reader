@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark mode color overrides for Material Design 3 night theme -->
+<resources>
+    <color name="colorPrimaryDark_night">#A8C7FA</color>
+    <color name="colorOnPrimaryDark_night">#003063</color>
+    <color name="colorPrimaryContainerDark_night">#00468B</color>
+    <color name="colorSurfaceDark_night">#1A1C1E</color>
+    <color name="colorOnSurfaceDark_night">#E2E2E6</color>
+    <color name="colorSurfaceVariantDark_night">#43474E</color>
+</resources>
